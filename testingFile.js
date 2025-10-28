@@ -1,5 +1,9 @@
 import 'dotenv/config';
-import { getSubscriptions, createNewExpense } from './utils/notion_helper.js';
+import {
+  getSubscriptions,
+  createNewExpense,
+  updateMonthlyExpensesWithSubscriptions,
+} from './utils/notion_helper.js';
 
 const newExpenses = {
   name: 'Test Expense',
@@ -8,6 +12,6 @@ const newExpenses = {
   category: 'Subscription',
 };
 
-const test = await createNewExpense(newExpenses);
+await updateMonthlyExpensesWithSubscriptions();
 
-console.log(test);
+console.log('done');

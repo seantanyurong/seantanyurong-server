@@ -27,7 +27,7 @@ export const createNewExpense = async (newExpense) => {
           title: [
             {
               text: {
-                content: newExpense.name,
+                content: newExpense.description,
               },
             },
           ],
@@ -53,9 +53,25 @@ export const createNewExpense = async (newExpense) => {
   }
 };
 
-// export const updateMonthlyExpensesWithSubscriptions = async () => {
-//   const subscriptions = await getSubscriptions();
-// };
+export const updateMonthlyExpensesWithSubscriptions = async () => {
+  try {
+    const subscriptions = await getSubscriptions();
+
+    for (const subscription of subscriptions) {
+      const subscriptionProperties = subscription.properties;
+      const newExpense = {
+        description: subscriptionProperties['Name'].title[0].plain_text,
+        amount: subscriptionProperties['Amount'].number,
+        overrideDate: subscriptionProperties['Start Date'].date.start,
+        category: 'Subscription',
+      };
+
+      await createNewExpense(newExpense);
+    }
+  } catch (error) {
+    console.error('An error occurred:', error.message);
+  }
+};
 
 // export const updateOrderConstantsToNextOrderGroup = async () => {
 //   const orderConstants = await getOrderConstants();
