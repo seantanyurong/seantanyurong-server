@@ -5,6 +5,7 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import indexRouter from './routes/index.js';
+import cron from 'node-cron';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,6 +24,18 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+
+cron.schedule(
+  // '0 6 1 * *',
+  '0 16 * * 2',
+  () => {
+    console.log('[CRON] Adding subscriptions to monthly expenses');
+    updateMonthlyExpensesWithSubscriptions();
+  },
+  {
+    timezone: 'Asia/Singapore',
+  },
+);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

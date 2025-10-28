@@ -1,5 +1,5 @@
 import { Client } from '@notionhq/client';
-// import { parseISO, addWeeks, format } from 'date-fns';
+import { getSubscriptionDateForThisMonth } from './general_helper.js';
 
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
@@ -59,10 +59,13 @@ export const updateMonthlyExpensesWithSubscriptions = async () => {
 
     for (const subscription of subscriptions) {
       const subscriptionProperties = subscription.properties;
+      const subscriptionDate = getSubscriptionDateForThisMonth(
+        subscriptionProperties['Start Date'].date.start,
+      );
       const newExpense = {
         description: subscriptionProperties['Name'].title[0].plain_text,
         amount: subscriptionProperties['Amount'].number,
-        overrideDate: subscriptionProperties['Start Date'].date.start,
+        overrideDate: subscriptionDate,
         category: 'Subscription',
       };
 
@@ -72,38 +75,3 @@ export const updateMonthlyExpensesWithSubscriptions = async () => {
     console.error('An error occurred:', error.message);
   }
 };
-
-// export const updateOrderConstantsToNextOrderGroup = async () => {
-//   const orderConstants = await getOrderConstants();
-//   const newOrderGroup = orderConstants.orderGroup + 1;
-//   const newPickupDate = format(
-//     addWeeks(parseISO(orderConstants.pickupDate), 1),
-//     'yyyy-MM-dd',
-//   );
-//   const newDeliveryDate = format(
-//     addWeeks(parseISO(orderConstants.deliveryDate), 1),
-//     'yyyy-MM-dd',
-//   );
-//
-//   await notion.pages.update({
-//     page_id: ORDER_CONSTANTS_PAGE_ID,
-//     properties: {
-//       'Order Group': {
-//         number: newOrderGroup,
-//       },
-//       'Current Order': {
-//         number: 0,
-//       },
-//       'Pickup Date': {
-//         date: {
-//           start: newPickupDate,
-//         },
-//       },
-//       'Delivery Date': {
-//         date: {
-//           start: newDeliveryDate,
-//         },
-//       },
-//     },
-//   });
-// };

@@ -1,17 +1,18 @@
 import 'dotenv/config';
-import {
-  getSubscriptions,
-  createNewExpense,
-  updateMonthlyExpensesWithSubscriptions,
-} from './utils/notion_helper.js';
+import { updateMonthlyExpensesWithSubscriptions } from './utils/notion_helper.js';
+import { getSubscriptionDateForThisMonth } from './utils/general_helper.js';
 
-const newExpenses = {
-  name: 'Test Expense',
-  amount: 100,
-  overrideDate: '2023-01-01',
-  category: 'Subscription',
-};
+// const newExpenses = {
+//   name: 'Test Expense',
+//   amount: 100,
+//   overrideDate: '2023-01-01',
+//   category: 'Subscription',
+// };
 
 await updateMonthlyExpensesWithSubscriptions();
+//
+// const subscriptionDate = getSubscriptionDateForThisMonth('2023-01-01');
+//
+// console.log(subscriptionDate);
 
 console.log('done');
