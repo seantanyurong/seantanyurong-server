@@ -1,5 +1,8 @@
 import 'dotenv/config';
-import { updateMonthlyExpensesWithSubscriptions } from './utils/notion_helper.js';
+import {
+  updateMonthlyExpensesWithSubscriptions,
+  updateMonthlyExpensesWithYearlySubscriptions,
+} from './utils/notion_helper.js';
 import { getSubscriptionDateForThisMonth } from './utils/general_helper.js';
 
 // const newExpenses = {
@@ -9,7 +12,8 @@ import { getSubscriptionDateForThisMonth } from './utils/general_helper.js';
 //   category: 'Subscription',
 // };
 
-await updateMonthlyExpensesWithSubscriptions();
+// await updateMonthlyExpensesWithSubscriptions();
+await updateMonthlyExpensesWithYearlySubscriptions();
 //
 // const subscriptionDate = getSubscriptionDateForThisMonth('2023-01-01');
 //

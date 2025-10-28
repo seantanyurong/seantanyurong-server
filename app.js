@@ -7,7 +7,10 @@ import logger from 'morgan';
 import indexRouter from './routes/index.js';
 import cron from 'node-cron';
 import { fileURLToPath } from 'url';
-import { updateMonthlyExpensesWithSubscriptions } from './utils/notion_helper.js';
+import {
+  updateMonthlyExpensesWithSubscriptions,
+  updateMonthlyExpensesWithYearlySubscriptions,
+} from './utils/notion_helper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,10 +31,11 @@ app.use('/', indexRouter);
 
 cron.schedule(
   // '0 6 1 * *',
-  '0 16 * * 2',
+  '30 17 * * 2',
   () => {
     console.log('[CRON] Adding subscriptions to monthly expenses');
     updateMonthlyExpensesWithSubscriptions();
+    updateMonthlyExpensesWithYearlySubscriptions();
   },
   {
     timezone: 'Asia/Singapore',

@@ -13,3 +13,17 @@ export const getSubscriptionDateForThisMonth = (startDate) => {
   const iso = format(newDate, 'yyyy-MM-dd');
   return iso;
 };
+
+export const getSubscriptionDateForThisYear = (startDate) => {
+  const date = parseISO(startDate);
+  const day = getDate(date);
+  const today = new Date();
+  const newDate = new Date(
+    today.getFullYear(),
+    today.getMonth(), // zero-based
+    day,
+  );
+
+  const iso = format(newDate, 'yyyy-MM-dd');
+  return iso;
+};
