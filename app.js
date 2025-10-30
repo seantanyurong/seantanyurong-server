@@ -30,8 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 
 cron.schedule(
-  // '0 6 1 * *',
-  '30 17 * * 2',
+  '0 6 1 * *',
   () => {
     console.log('[CRON] Adding subscriptions to monthly expenses');
     updateMonthlyExpensesWithSubscriptions();
