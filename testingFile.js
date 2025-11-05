@@ -12,11 +12,10 @@ import { getSubscriptionDateForThisMonth } from './utils/general_helper.js';
 //   category: 'Subscription',
 // };
 
-// await updateMonthlyExpensesWithSubscriptions();
-await updateMonthlyExpensesWithYearlySubscriptions();
+await updateMonthlyExpensesWithSubscriptions();
+// await updateMonthlyExpensesWithYearlySubscriptions();
 //
 // const subscriptionDate = getSubscriptionDateForThisMonth('2023-01-01');
-//
 // console.log(subscriptionDate);
 
 console.log('done');
