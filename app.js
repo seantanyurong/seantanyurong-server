@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url';
 import {
   updateMonthlyExpensesWithSubscriptions,
   updateMonthlyExpensesWithYearlySubscriptions,
-  createNewExpense,
 } from './utils/notion_helper.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,24 +35,6 @@ cron.schedule(
     console.log('[CRON] Adding subscriptions to monthly expenses');
     updateMonthlyExpensesWithSubscriptions();
     updateMonthlyExpensesWithYearlySubscriptions();
-  },
-  {
-    timezone: 'Asia/Singapore',
-  },
-);
-
-cron.schedule(
-  '40 16 * * *',
-  () => {
-    const newExpenses = {
-      name: 'Test Expense',
-      amount: 100,
-      overrideDate: '2023-01-01',
-      category: 'Subscription',
-      description: 'Test Description',
-    };
-
-    createNewExpense(newExpenses);
   },
   {
     timezone: 'Asia/Singapore',
