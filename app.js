@@ -43,7 +43,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  '35 4 * * *',
+  '40 16 * * *',
   () => {
     const newExpenses = {
       name: 'Test Expense',
