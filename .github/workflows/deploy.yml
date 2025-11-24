@@ -17,14 +17,13 @@ jobs:
         USER: ${{ secrets.EC2_USER }}
       run: |
         echo "Deploying to EC2..."
-        echo "Host: $HOST"
-        echo "User: $USER"
         echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
         ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
         echo "Current directory: $(pwd)"
         echo "Listing home directory:"
         ls -la ~
 
+        echo "Pulling from main..."
         cd ~/seantanyurong-server
         git pull origin main
 
