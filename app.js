@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 import {
   updateMonthlyExpensesWithSubscriptions,
   updateMonthlyExpensesWithYearlySubscriptions,
+  createWeeklyReview,
 } from './utils/notion_helper.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,13 +42,24 @@ cron.schedule(
   },
 );
 
+cron.schedule(
+  '0 0 * * 1',
+  () => {
+    console.log('[CRON] Creating weekly review page');
+    createWeeklyReview();
+  },
+  {
+    timezone: 'Asia/Singapore',
+  },
+);
+
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use(function(req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
