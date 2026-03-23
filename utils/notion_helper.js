@@ -12,6 +12,7 @@ const notion = new Client({
 const SUBSCRIPTIONS_DATASOURCE_ID = '298646e6-5266-80ce-9e1e-000bdcd5beb7';
 const EXPENSES_DATASOURCE_ID = '298646e6-5266-80b2-9486-000b83774804';
 const WEEKLY_REVIEW_DATASOURCE_ID = '29144777-74cf-4496-aae0-de1c94eaa3f8';
+const TIME_TRACKER_DATASOURCE_ID = '315646e6-5266-8041-a54c-000bdf8d313e';
 
 export const getSubscriptions = async (frequency) => {
   const { results } = await notion.dataSources.query({
@@ -139,6 +140,50 @@ export const createWeeklyReview = async () => {
       },
     });
     return response;
+  } catch (error) {
+    console.error('An error occurred:', error.message);
+  }
+};
+
+export const createDailyTimeTrackerPages = async () => {
+  const pages = [
+    { title: 'constructor', project: 'Work' },
+    { title: 'jobless club', project: 'Jobless Club' },
+    { title: 'studying', project: 'Studying' },
+  ];
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    for (const page of pages) {
+      await notion.pages.create({
+        parent: {
+          data_source_id: TIME_TRACKER_DATASOURCE_ID,
+        },
+        properties: {
+          Name: {
+            title: [
+              {
+                text: {
+                  content: page.title,
+                },
+              },
+            ],
+          },
+          Project: {
+            select: {
+              name: page.project,
+            },
+          },
+          Date: {
+            date: {
+              start: today,
+            },
+          },
+          Duration: {
+            number: 0,
+          },
+        },
+      });
+    }
   } catch (error) {
     console.error('An error occurred:', error.message);
   }

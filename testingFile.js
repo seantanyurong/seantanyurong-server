@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import {
-  createWeeklyReview,
+  createDailyTimeTrackerPages,
 } from './utils/notion_helper.js';
 
 
-await createWeeklyReview();
+await createDailyTimeTrackerPages();
 console.log('done');
 

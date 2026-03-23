@@ -11,6 +11,7 @@ import {
   updateMonthlyExpensesWithSubscriptions,
   updateMonthlyExpensesWithYearlySubscriptions,
   createWeeklyReview,
+  createDailyTimeTrackerPages,
 } from './utils/notion_helper.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,10 +44,21 @@ cron.schedule(
 );
 
 cron.schedule(
-  '0 0 * * 1',
+  '0 1 * * 1',
   () => {
     console.log('[CRON] Creating weekly review page');
     createWeeklyReview();
+  },
+  {
+    timezone: 'Asia/Singapore',
+  },
+);
+
+cron.schedule(
+  '0 1 * * *',
+  () => {
+    console.log('[CRON] Creating daily time tracker pages');
+    createDailyTimeTrackerPages();
   },
   {
     timezone: 'Asia/Singapore',
