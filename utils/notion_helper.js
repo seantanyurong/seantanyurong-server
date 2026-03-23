@@ -99,7 +99,7 @@ export const getWeeklyReviewTemplates = async () => {
 
 export const createWeeklyReview = async () => {
   try {
-    const today = new Date(); // Monday when cron fires
+    const today = new Date(); // Saturday when cron fires
 
     const saturday = new Date(today);
     saturday.setDate(today.getDate() - 2);
@@ -112,6 +112,42 @@ export const createWeeklyReview = async () => {
     const pageName = `${year} W${weekNumber}`;
 
     const formatDate = (date) => date.toISOString().split('T')[0];
+
+    // Query time tracker entries for Mon–Fri of the past week
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - 5);
+    const pastFriday = new Date(today);
+    pastFriday.setDate(today.getDate() - 1);
+
+    const { results: timeEntries } = await notion.dataSources.query({
+      data_source_id: TIME_TRACKER_DATASOURCE_ID,
+      filter: {
+        and: [
+          {
+            property: 'Date',
+            date: { on_or_after: formatDate(monday) },
+          },
+          {
+            property: 'Date',
+            date: { on_or_before: formatDate(pastFriday) },
+          },
+        ],
+      },
+    });
+
+    const totals = { Work: 0, 'Jobless Club': 0, Studying: 0 };
+    for (const entry of timeEntries) {
+      const project = entry.properties['Project']?.select?.name;
+      const duration = entry.properties['Duration']?.number ?? 0;
+      if (project && totals[project] !== undefined) {
+        totals[project] += duration;
+      }
+    }
+
+    const averages = {};
+    for (const project of Object.keys(totals)) {
+      averages[project] = (totals[project] / 5).toFixed(1);
+    }
 
     const response = await notion.pages.create({
       parent: {
@@ -139,6 +175,28 @@ export const createWeeklyReview = async () => {
         },
       },
     });
+
+    await notion.blocks.children.append({
+      block_id: response.id,
+      children: [
+        {
+          paragraph: {
+            rich_text: [{ text: { content: `Work: ${averages['Work']} hrs/day avg` } }],
+          },
+        },
+        {
+          paragraph: {
+            rich_text: [{ text: { content: `Jobless Club: ${averages['Jobless Club']} hrs/day avg` } }],
+          },
+        },
+        {
+          paragraph: {
+            rich_text: [{ text: { content: `Studying: ${averages['Studying']} hrs/day avg` } }],
+          },
+        },
+      ],
+    });
+
     return response;
   } catch (error) {
     console.error('An error occurred:', error.message);

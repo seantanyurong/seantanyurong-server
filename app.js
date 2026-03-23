@@ -44,7 +44,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  '0 1 * * 1',
+  '0 1 * * 6',
   () => {
     console.log('[CRON] Creating weekly review page');
     createWeeklyReview();
@@ -55,7 +55,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  '0 1 * * *',
+  '0 1 * * 1-5',
   () => {
     console.log('[CRON] Creating daily time tracker pages');
     createDailyTimeTrackerPages();
