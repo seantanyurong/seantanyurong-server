@@ -209,7 +209,9 @@ export const createDailyTimeTrackerPages = async () => {
     { title: 'jobless club', project: 'Jobless Club' },
     { title: 'studying', project: 'Studying' },
   ];
-  const today = new Date().toISOString().split('T')[0];
+
+  // Adding 8 hours for UTC+8
+  const today = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().split('T')[0];
   try {
     for (const page of pages) {
       await notion.pages.create({
