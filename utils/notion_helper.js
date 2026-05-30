@@ -101,11 +101,8 @@ export const createWeeklyReview = async () => {
   try {
     const today = new Date(); // Saturday when cron fires
 
-    const saturday = new Date(today);
-    saturday.setDate(today.getDate() - 2);
-
-    const friday = new Date(today);
-    friday.setDate(today.getDate() + 4);
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - 6);
 
     const weekNumber = getISOWeek(today);
     const year = getISOWeekYear(today);
@@ -114,8 +111,8 @@ export const createWeeklyReview = async () => {
     const formatDate = (date) => date.toISOString().split('T')[0];
 
     // Query time tracker entries for Mon–Fri of the past week
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - 5);
+    const pastMonday = new Date(today);
+    pastMonday.setDate(today.getDate() - 5);
     const pastFriday = new Date(today);
     pastFriday.setDate(today.getDate() - 1);
 
@@ -125,7 +122,7 @@ export const createWeeklyReview = async () => {
         and: [
           {
             property: 'Date',
-            date: { on_or_after: formatDate(monday) },
+            date: { on_or_after: formatDate(pastMonday) },
           },
           {
             property: 'Date',
@@ -169,8 +166,8 @@ export const createWeeklyReview = async () => {
         },
         Date: {
           date: {
-            start: formatDate(saturday),
-            end: formatDate(friday),
+            start: formatDate(sunday),
+            end: formatDate(today),
           },
         },
       },
@@ -181,17 +178,31 @@ export const createWeeklyReview = async () => {
       children: [
         {
           paragraph: {
-            rich_text: [{ text: { content: `Work: ${averages['Work']} hrs/day avg` } }],
+            rich_text: [
+              { text: { content: `Work: ${averages['Work']} hrs/day avg` } },
+            ],
           },
         },
         {
           paragraph: {
-            rich_text: [{ text: { content: `Jobless Club: ${averages['Jobless Club']} hrs/day avg` } }],
+            rich_text: [
+              {
+                text: {
+                  content: `Jobless Club: ${averages['Jobless Club']} hrs/day avg`,
+                },
+              },
+            ],
           },
         },
         {
           paragraph: {
-            rich_text: [{ text: { content: `Studying: ${averages['Studying']} hrs/day avg` } }],
+            rich_text: [
+              {
+                text: {
+                  content: `Studying: ${averages['Studying']} hrs/day avg`,
+                },
+              },
+            ],
           },
         },
       ],
@@ -211,7 +222,9 @@ export const createDailyTimeTrackerPages = async () => {
   ];
 
   // Adding 8 hours for UTC+8
-  const today = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const today = new Date(Date.now() + 8 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
   try {
     for (const page of pages) {
       await notion.pages.create({
