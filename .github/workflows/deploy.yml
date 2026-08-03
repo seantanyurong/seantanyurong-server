@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy to Droplet
 
 on:
   push:
@@ -10,15 +10,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Deploy to EC2
+    - name: Deploy to Droplet
       env:
-        PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-        HOST: ${{ secrets.EC2_HOST }}
-        USER: ${{ secrets.EC2_USER }}
+        PRIVATE_KEY: ${{ secrets.DROPLET_PRIVATE_KEY }}
+        HOST: ${{ secrets.DROPLET_HOST }}
+        USER: ${{ secrets.DROPLET_USER }}
       run: |
-        echo "Deploying to EC2..."
-        echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
-        ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
+        echo "Deploying to Droplet..."
+        echo "$PRIVATE_KEY" > github-deploy.pem && chmod 600 github-deploy.pem
+        ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} '
         echo "Current directory: $(pwd)"
         echo "Listing home directory:"
         ls -la ~
