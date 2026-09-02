@@ -7,7 +7,7 @@ import { getSubscriptionDateForThisMonth } from '../utils/general_helper.js';
 const monthly = await getInsurancePolicies('Monthly');
 const yearly = await getInsurancePolicies('Yearly');
 
-console.log('=== MONTHLY GIRO DBS POLICIES ===');
+console.log('=== MONTHLY GIRO POLICIES (DBS + SC) ===');
 for (const p of monthly) {
   const props = p.properties;
   const startDate = props['Start Date'].date.start;
@@ -20,7 +20,7 @@ for (const p of monthly) {
 }
 console.log('total monthly: $' + monthly.reduce((acc, p) => acc + Math.round((p.properties['Premium ($)'].number / 12) * 100) / 100, 0));
 
-console.log('\n=== YEARLY GIRO DBS POLICIES ===');
+console.log('\n=== YEARLY GIRO POLICIES (DBS + SC) ===');
 for (const p of yearly) {
   const props = p.properties;
   const startDate = props['Start Date'].date.start;

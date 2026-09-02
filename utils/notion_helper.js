@@ -302,10 +302,20 @@ export const getInsurancePolicies = async (frequency) => {
     filter: {
       and: [
         {
-          property: 'Payment',
-          select: {
-            equals: 'GIRO DBS',
-          },
+          or: [
+            {
+              property: 'Payment',
+              select: {
+                equals: 'GIRO DBS',
+              },
+            },
+            {
+              property: 'Payment',
+              select: {
+                equals: 'GIRO SC',
+              },
+            },
+          ],
         },
         {
           property: 'Frequency',
