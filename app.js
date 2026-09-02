@@ -10,6 +10,8 @@ import { fileURLToPath } from 'url';
 import {
   updateMonthlyExpensesWithSubscriptions,
   updateMonthlyExpensesWithYearlySubscriptions,
+  updateMonthlyExpensesWithInsurance,
+  updateMonthlyExpensesWithYearlyInsurance,
   createWeeklyReview,
   createDailyTimeTrackerPages,
 } from './utils/notion_helper.js';
@@ -34,9 +36,11 @@ app.use('/', indexRouter);
 cron.schedule(
   '0 0 2 * *',
   () => {
-    console.log('[CRON] Adding subscriptions to monthly expenses');
+    console.log('[CRON] Adding subscriptions & insurance to monthly expenses');
     updateMonthlyExpensesWithSubscriptions();
     updateMonthlyExpensesWithYearlySubscriptions();
+    updateMonthlyExpensesWithInsurance();
+    updateMonthlyExpensesWithYearlyInsurance();
   },
   {
     timezone: 'Asia/Singapore',

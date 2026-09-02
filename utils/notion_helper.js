@@ -10,6 +10,7 @@ const notion = new Client({
 });
 
 const SUBSCRIPTIONS_DATASOURCE_ID = '298646e6-5266-80ce-9e1e-000bdcd5beb7';
+const INSURANCE_DATASOURCE_ID = '277646e6-5266-8069-8c40-000ba36ddb1f';
 const EXPENSES_DATASOURCE_ID = '298646e6-5266-80b2-9486-000b83774804';
 const WEEKLY_REVIEW_DATASOURCE_ID = '29144777-74cf-4496-aae0-de1c94eaa3f8';
 const TIME_TRACKER_DATASOURCE_ID = '315646e6-5266-8041-a54c-000bdf8d313e';
@@ -286,6 +287,95 @@ export const updateMonthlyExpensesWithYearlySubscriptions = async () => {
         amount: subscriptionProperties['Amount'].number,
         overrideDate: subscriptionDate,
         category: 'Subscription',
+      };
+
+      await createNewExpense(newExpense);
+    }
+  } catch (error) {
+    console.error('An error occurred:', error.message);
+  }
+};
+
+export const getInsurancePolicies = async (frequency) => {
+  const { results } = await notion.dataSources.query({
+    data_source_id: INSURANCE_DATASOURCE_ID,
+    filter: {
+      and: [
+        {
+          property: 'Payment',
+          select: {
+            equals: 'GIRO DBS',
+          },
+        },
+        {
+          property: 'Frequency',
+          select: {
+            equals: frequency,
+          },
+        },
+      ],
+    },
+  });
+
+  return results;
+};
+
+export const updateMonthlyExpensesWithInsurance = async () => {
+  try {
+    const policies = await getInsurancePolicies('Monthly');
+
+    for (const policy of policies) {
+      const policyProperties = policy.properties;
+      const startDate = policyProperties['Start Date'].date.start;
+      const today = new Date();
+
+      // Don't book before the policy's start date (e.g. starts next month)
+      const startMonthStart = new Date(startDate);
+      startMonthStart.setDate(1);
+      startMonthStart.setHours(0, 0, 0, 0);
+      const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      if (thisMonthStart < startMonthStart) {
+        continue;
+      }
+
+      // Premiums are yearly figures; monthly-paid plans are split across 12 months
+      const yearlyPremium = policyProperties['Premium ($)'].number;
+      const monthlyAmount = Math.round((yearlyPremium / 12) * 100) / 100;
+
+      const newExpense = {
+        description: `${policyProperties['Name'].title[0].plain_text} (${policyProperties['Company'].select.name})`,
+        amount: monthlyAmount,
+        overrideDate: getSubscriptionDateForThisMonth(startDate),
+        category: 'Insurance',
+      };
+
+      await createNewExpense(newExpense);
+    }
+  } catch (error) {
+    console.error('An error occurred:', error.message);
+  }
+};
+
+export const updateMonthlyExpensesWithYearlyInsurance = async () => {
+  try {
+    const policies = await getInsurancePolicies('Yearly');
+
+    for (const policy of policies) {
+      const policyProperties = policy.properties;
+      const policyPropertyDate =
+        policyProperties['Start Date'].date.start;
+      const beenOneYear =
+        getMonth(new Date()) === getMonth(new Date(policyPropertyDate));
+
+      if (!beenOneYear) {
+        continue;
+      }
+
+      const newExpense = {
+        description: `${policyProperties['Name'].title[0].plain_text} (${policyProperties['Company'].select.name})`,
+        amount: policyProperties['Premium ($)'].number,
+        overrideDate: getSubscriptionDateForThisYear(policyPropertyDate),
+        category: 'Insurance',
       };
 
       await createNewExpense(newExpense);
