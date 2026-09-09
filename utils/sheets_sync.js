@@ -78,16 +78,17 @@ const MONTHS = [
   'july', 'august', 'september', 'october', 'november', 'december',
 ];
 
-async function getMonthColumn(sheets, year) {
+async function getMonthColumn(sheets, year, month) {
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${year}!A2:O2`,
+    range: `${year}!A2:P2`,
   });
   const header = res.data.values?.[0] ?? [];
+  // header[0] = 'Actual' (A), header[1] = 'Currency' (B), header[2] = 'January' (C) ...
+  const want = MONTHS[month - 1]; // month is 1-12 -> 'january'...
   for (let i = 0; i < header.length; i++) {
     const v = String(header[i] || '').trim().toLowerCase();
-    const idx = MONTHS.indexOf(v);
-    if (idx !== -1) return { col: i + 1, monthIdx: idx }; // 1-indexed col
+    if (v === want) return { col: i + 1 }; // i=2 (January) -> C (3)
   }
   return null;
 }
@@ -132,12 +133,13 @@ export async function syncExpensesToSheet(targetYear = null, targetMonth = null)
   }
 
   // Sheet positions
-  const monthCol = await getMonthColumn(sheets, year);
+  const monthCol = await getMonthColumn(sheets, year, month);
   if (!monthCol) {
     console.error('[SYNC] Could not map month column.');
     return { ok: false, error: 'month column not found' };
   }
   const colLetter = String.fromCharCode(64 + monthCol.col);
+  console.log(`[SYNC] month=${month} -> col=${colLetter} (idx ${monthCol.col})`);
 
   const catRows = await getCategoryRows(sheets, year);
 
