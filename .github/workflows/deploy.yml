@@ -15,6 +15,7 @@ jobs:
         PRIVATE_KEY: ${{ secrets.DROPLET_PRIVATE_KEY }}
         HOST: ${{ secrets.DROPLET_HOST }}
         USER: ${{ secrets.DROPLET_USER }}
+        GOOGLE_SA_B64: ${{ secrets.GOOGLE_SA_B64 }}
       run: |
         echo "Deploying to Droplet..."
         echo "$PRIVATE_KEY" > github-deploy.pem && chmod 600 github-deploy.pem
@@ -26,6 +27,20 @@ jobs:
         echo "Pulling from main..."
         cd ~/seantanyurong-server
         git pull origin main
+
+        echo "Ensuring googleapis dependency installed..."
+        npm install --omit=dev --no-audit --no-fund 2>/dev/null || true
+
+        echo "Writing Google service-account credential to .env (if secret present)..."
+        if [ -n "$GOOGLE_SA_B64" ]; then
+          # Remove any existing GOOGLE_SA_B64 line, then append the new one
+          grep -v "^GOOGLE_SA_B64=" .env > .env.tmp || true
+          echo "GOOGLE_SA_B64=$GOOGLE_SA_B64" >> .env.tmp
+          mv .env.tmp .env
+          echo "GOOGLE_SA_B64 written to .env"
+        else
+          echo "WARN: GOOGLE_SA_B64 secret not set — sheet sync will fail until added"
+        fi
 
         echo "Starting/restarting application..."
         sudo systemctl restart seantanyurong-server.service
