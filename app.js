@@ -83,6 +83,19 @@ cron.schedule(
   },
 );
 
+// Manual sync trigger: GET /sync-expenses?year=2026&month=8
+app.get('/sync-expenses', async (req, res) => {
+  try {
+    const year = req.query.year ? parseInt(req.query.year, 10) : null;
+    const month = req.query.month ? parseInt(req.query.month, 10) : null;
+    const result = await syncExpensesToSheet(year, month);
+    res.json(result);
+  } catch (err) {
+    console.error('[SYNC-ENDPOINT] Failed:', err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
