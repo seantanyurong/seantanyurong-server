@@ -15,43 +15,18 @@ jobs:
         PRIVATE_KEY: ${{ secrets.DROPLET_PRIVATE_KEY }}
         HOST: ${{ secrets.DROPLET_HOST }}
         USER: ${{ secrets.DROPLET_USER }}
-        GOOGLE_SA_B64: ${{ secrets.GOOGLE_SA_B64 }}
       run: |
         echo "Deploying to Droplet..."
         echo "$PRIVATE_KEY" > github-deploy.pem && chmod 600 github-deploy.pem
-
-        ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} "
-        echo 'Current directory: '$(pwd)
-        echo 'Listing home directory:'
+        ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} '
+        echo "Current directory: $(pwd)"
+        echo "Listing home directory:"
         ls -la ~
 
-        echo 'Pulling from main...'
+        echo "Pulling from main..."
         cd ~/seantanyurong-server
         git pull origin main
 
-        echo 'Ensuring googleapis dependency installed...'
-        npm install --omit=dev --no-audit --no-fund 2>/dev/null || true
-
-        echo 'Writing Google service-account credential to .env...'
-        # Base64-encode the secret on the runner so the raw value never appears
-        # in a command line (GitHub masks secrets in logged command lines).
-        printf '%s' "$GOOGLE_SA_B64" | base64 -w0 > /tmp/sa_b64.txt
-        scp -o StrictHostKeyChecking=no -i github-deploy.pem /tmp/sa_b64.txt ${USER}@${HOST}:/tmp/sa_b64.txt
-        ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} '
-          cd ~/seantanyurong-server
-          SA_VALUE=$(cat /tmp/sa_b64.txt | base64 -d)
-          grep -v "^GOOGLE_SA_B64=" .env > .env.tmp || true
-          printf "GOOGLE_SA_B64=%s\n" "$SA_VALUE" >> .env.tmp
-          mv .env.tmp .env
-          rm -f /tmp/sa_b64.txt
-          echo "CREDENTIAL WRITTEN OK"
-        '
-
-        echo 'Starting/restarting application...'
+        echo "Starting/restarting application..."
         sudo systemctl restart seantanyurong-server.service
-
-        echo 'Verifying sheet-sync module with credentials...'
-        cd ~/seantanyurong-server
-        set -a && . ./.env && set +a
-        node -e \"import('./utils/sheets_sync.js').then(m => m.syncExpensesToSheet(2026, 8)).then(r => { console.log('VERIFY OK, cells:', r.updatedCells ?? 'n/a'); process.exit(0); }).catch(e => { console.error('VERIFY FAILED:', e.message); process.exit(1); })\"
-        "
+        '
