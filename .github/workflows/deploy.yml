@@ -33,16 +33,17 @@ jobs:
         npm install --omit=dev --no-audit --no-fund 2>/dev/null || true
 
         echo 'Writing Google service-account credential to .env...'
-        # Write value to a temp file locally (avoids shell interpolation of +/= chars),
-        # then append it remotely.
-        printf 'GOOGLE_SA_B64=%s\n' "$GOOGLE_SA_B64" > /tmp/sa_line.txt
-        scp -o StrictHostKeyChecking=no -i github-deploy.pem /tmp/sa_line.txt ${USER}@${HOST}:/tmp/sa_line.txt
+        # Base64-encode the secret on the runner so the raw value never appears
+        # in a command line (GitHub masks secrets in logged command lines).
+        printf '%s' "$GOOGLE_SA_B64" | base64 -w0 > /tmp/sa_b64.txt
+        scp -o StrictHostKeyChecking=no -i github-deploy.pem /tmp/sa_b64.txt ${USER}@${HOST}:/tmp/sa_b64.txt
         ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} '
           cd ~/seantanyurong-server
+          SA_VALUE=$(cat /tmp/sa_b64.txt | base64 -d)
           grep -v "^GOOGLE_SA_B64=" .env > .env.tmp || true
-          cat /tmp/sa_line.txt >> .env.tmp
+          printf "GOOGLE_SA_B64=%s\n" "$SA_VALUE" >> .env.tmp
           mv .env.tmp .env
-          rm -f /tmp/sa_line.txt
+          rm -f /tmp/sa_b64.txt
           echo "CREDENTIAL WRITTEN OK"
         '
 
