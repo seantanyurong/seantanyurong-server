@@ -44,4 +44,8 @@ jobs:
 
         echo "Starting/restarting application..."
         sudo systemctl restart seantanyurong-server.service
+
+        echo "Verifying sheet-sync module loads with credentials..."
+        cd ~/seantanyurong-server
+        node -e "import('./utils/sheets_sync.js').then(m => m.syncExpensesToSheet(2026, 8)).then(r => { console.log('VERIFY OK, cells updated:', r.updatedCells ?? 'n/a'); process.exit(0); }).catch(e => { console.error('VERIFY FAILED:', e.message); process.exit(1); })"
         '
