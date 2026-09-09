@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Deploy to Droplet
       env:
         PRIVATE_KEY: ${{ secrets.DROPLET_PRIVATE_KEY }}
@@ -19,33 +19,33 @@ jobs:
       run: |
         echo "Deploying to Droplet..."
         echo "$PRIVATE_KEY" > github-deploy.pem && chmod 600 github-deploy.pem
-        ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} '
-        echo "Current directory: $(pwd)"
-        echo "Listing home directory:"
+
+        ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} "
+        echo 'Current directory: '$(pwd)
+        echo 'Listing home directory:'
         ls -la ~
 
-        echo "Pulling from main..."
+        echo 'Pulling from main...'
         cd ~/seantanyurong-server
         git pull origin main
 
-        echo "Ensuring googleapis dependency installed..."
+        echo 'Ensuring googleapis dependency installed...'
         npm install --omit=dev --no-audit --no-fund 2>/dev/null || true
 
-        echo "Writing Google service-account credential to .env (if secret present)..."
-        if [ -n "$GOOGLE_SA_B64" ]; then
-          # Remove any existing GOOGLE_SA_B64 line, then append the new one
-          grep -v "^GOOGLE_SA_B64=" .env > .env.tmp || true
-          echo "GOOGLE_SA_B64=$GOOGLE_SA_B64" >> .env.tmp
+        echo 'Writing Google service-account credential to .env...'
+        if [ -n \"$GOOGLE_SA_B64\" ]; then
+          grep -v '^GOOGLE_SA_B64=' .env > .env.tmp || true
+          echo \"GOOGLE_SA_B64=$GOOGLE_SA_B64\" >> .env.tmp
           mv .env.tmp .env
-          echo "GOOGLE_SA_B64 written to .env"
+          echo 'CREDENTIAL WRITTEN OK'
         else
-          echo "WARN: GOOGLE_SA_B64 secret not set — sheet sync will fail until added"
+          echo 'WARN: GOOGLE_SA_B64 not passed through SSH'
         fi
 
-        echo "Starting/restarting application..."
+        echo 'Starting/restarting application...'
         sudo systemctl restart seantanyurong-server.service
 
-        echo "Verifying sheet-sync module loads with credentials..."
+        echo 'Verifying sheet-sync module with credentials...'
         cd ~/seantanyurong-server
-        node -e "import('./utils/sheets_sync.js').then(m => m.syncExpensesToSheet(2026, 8)).then(r => { console.log('VERIFY OK, cells updated:', r.updatedCells ?? 'n/a'); process.exit(0); }).catch(e => { console.error('VERIFY FAILED:', e.message); process.exit(1); })"
-        '
+        node -e \"import('./utils/sheets_sync.js').then(m => m.syncExpensesToSheet(2026, 8)).then(r => { console.log('VERIFY OK, cells:', r.updatedCells ?? 'n/a'); process.exit(0); }).catch(e => { console.error('VERIFY FAILED:', e.message); process.exit(1); })\"
+        "
