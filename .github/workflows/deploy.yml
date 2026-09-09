@@ -33,14 +33,18 @@ jobs:
         npm install --omit=dev --no-audit --no-fund 2>/dev/null || true
 
         echo 'Writing Google service-account credential to .env...'
-        if [ -n \"$GOOGLE_SA_B64\" ]; then
-          grep -v '^GOOGLE_SA_B64=' .env > .env.tmp || true
-          echo \"GOOGLE_SA_B64=$GOOGLE_SA_B64\" >> .env.tmp
+        # Write value to a temp file locally (avoids shell interpolation of +/= chars),
+        # then append it remotely.
+        printf 'GOOGLE_SA_B64=%s\n' "$GOOGLE_SA_B64" > /tmp/sa_line.txt
+        scp -o StrictHostKeyChecking=no -i github-deploy.pem /tmp/sa_line.txt ${USER}@${HOST}:/tmp/sa_line.txt
+        ssh -o StrictHostKeyChecking=no -i github-deploy.pem ${USER}@${HOST} '
+          cd ~/seantanyurong-server
+          grep -v "^GOOGLE_SA_B64=" .env > .env.tmp || true
+          cat /tmp/sa_line.txt >> .env.tmp
           mv .env.tmp .env
-          echo 'CREDENTIAL WRITTEN OK'
-        else
-          echo 'WARN: GOOGLE_SA_B64 not passed through SSH'
-        fi
+          rm -f /tmp/sa_line.txt
+          echo "CREDENTIAL WRITTEN OK"
+        '
 
         echo 'Starting/restarting application...'
         sudo systemctl restart seantanyurong-server.service
