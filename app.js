@@ -49,7 +49,7 @@ cron.schedule(
 );
 
 cron.schedule(
-  '30 0 2 * *',
+  '30 0 1 * *',
   () => {
     console.log('[CRON] Syncing previous month expenses to Google Sheet');
     syncExpensesToSheet().catch((err) =>
