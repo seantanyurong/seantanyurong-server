@@ -15,6 +15,7 @@ import {
   createWeeklyReview,
   createDailyTimeTrackerPages,
 } from './utils/notion_helper.js';
+import { syncExpensesToSheet } from './utils/sheets_sync.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,19 @@ cron.schedule(
     updateMonthlyExpensesWithYearlySubscriptions();
     updateMonthlyExpensesWithInsurance();
     updateMonthlyExpensesWithYearlyInsurance();
+  },
+  {
+    timezone: 'Asia/Singapore',
+  },
+);
+
+cron.schedule(
+  '30 0 2 * *',
+  () => {
+    console.log('[CRON] Syncing previous month expenses to Google Sheet');
+    syncExpensesToSheet().catch((err) =>
+      console.error('[CRON] Sheet sync failed:', err.message),
+    );
   },
   {
     timezone: 'Asia/Singapore',
