@@ -47,5 +47,6 @@ jobs:
 
         echo 'Verifying sheet-sync module with credentials...'
         cd ~/seantanyurong-server
+        set -a && . ./.env && set +a
         node -e \"import('./utils/sheets_sync.js').then(m => m.syncExpensesToSheet(2026, 8)).then(r => { console.log('VERIFY OK, cells:', r.updatedCells ?? 'n/a'); process.exit(0); }).catch(e => { console.error('VERIFY FAILED:', e.message); process.exit(1); })\"
         "
