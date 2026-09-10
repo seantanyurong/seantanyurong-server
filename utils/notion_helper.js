@@ -66,6 +66,15 @@ export const createNewExpense = async (newExpense) => {
   }
 };
 
+// Map a subscription name to its expense category.
+// "Parents" (and anything parent-related) gets its own category so the
+// Google Sheet sync writes it to the Parents row, not Subscription.
+const getCategoryForSubscription = (name) => {
+  const lower = (name || '').toLowerCase();
+  if (lower.includes('parent')) return 'Parents';
+  return 'Subscription';
+};
+
 export const updateMonthlyExpensesWithSubscriptions = async () => {
   try {
     const subscriptions = await getSubscriptions('Monthly');
@@ -77,11 +86,12 @@ export const updateMonthlyExpensesWithSubscriptions = async () => {
         subscriptionProperties['Start Date'].date.start,
       );
 
+      const name = subscriptionProperties['Name'].title[0].plain_text;
       const newExpense = {
-        description: subscriptionProperties['Name'].title[0].plain_text,
+        description: name,
         amount: subscriptionProperties['Amount'].number,
         overrideDate: subscriptionDate,
-        category: 'Subscription',
+        category: getCategoryForSubscription(name),
       };
 
       await createNewExpense(newExpense);
@@ -282,11 +292,12 @@ export const updateMonthlyExpensesWithYearlySubscriptions = async () => {
         subscriptionPropertyDate,
       );
 
+      const name = subscriptionProperties['Name'].title[0].plain_text;
       const newExpense = {
-        description: subscriptionProperties['Name'].title[0].plain_text,
+        description: name,
         amount: subscriptionProperties['Amount'].number,
         overrideDate: subscriptionDate,
-        category: 'Subscription',
+        category: getCategoryForSubscription(name),
       };
 
       await createNewExpense(newExpense);
