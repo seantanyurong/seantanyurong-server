@@ -94,9 +94,11 @@ async function getMonthColumn(sheets, year, month) {
 }
 
 async function getCategoryRows(sheets, year) {
+  // Only scan the Actuals block (rows 1-40). The forecast section (rows 42+)
+  // has its own 'Travel'/'Parents'/'Fun' labels and must NOT be touched.
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${year}!A1:A60`,
+    range: `${year}!A1:A40`,
   });
   const map = {};
   (res.data.values ?? []).forEach((row, i) => {
